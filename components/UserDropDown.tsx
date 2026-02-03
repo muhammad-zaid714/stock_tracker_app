@@ -1,0 +1,65 @@
+"use client"
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useRouter } from "next/navigation";
+import { LogOut } from "lucide-react";
+import NavItems from "./NavItems";
+const UserDropDown = () => {
+    const router = useRouter();
+    const handleSignOut =async () => {
+        // Perform sign-out logic here (e.g., clear auth tokens, update state)
+        // After sign-out, redirect to the login page
+        router.push('/sign-out');
+    }
+    const user = { name: "John Doe", email:'john.doe@example.com' };
+  return (
+    <DropdownMenu>
+  <DropdownMenuTrigger asChild>
+    <Button variant="ghost" className="flex items-center gap-3 text-gray-400 hover:text-yellow-500">
+        <Avatar className="h-8 w-8">
+  <AvatarImage src="https://github.com/shadcn.png" />
+  <AvatarFallback className="text-yellow-900 bg-yellow-500 text-sm font-bold">{user.name[0]}</AvatarFallback>
+</Avatar>
+  <div className="hidden md:flex flex-col items-start">
+    <span className="text-base font-medium text-gray-400">{user.name}</span>
+  </div>
+    </Button>
+  </DropdownMenuTrigger>
+  <DropdownMenuContent className="text-gray-400">
+    <DropdownMenuLabel>
+        <div className="flex relative items-center gap-3 py-2">
+    <Avatar className="h-10 w-10">
+  <AvatarImage src="https://github.com/shadcn.png" />
+  <AvatarFallback className="text-yellow-900 bg-yellow-500 text-sm font-bold">{user.name[0]}</AvatarFallback>
+</Avatar>
+<div className="flex flex-col">
+    <span className="font-medium text-gray-400 text-base">{user.name}</span>
+    <span className="text-sm text-gray-500">{user.email}</span>
+</div>
+   </div>
+    </DropdownMenuLabel>
+    <DropdownMenuSeparator className="bg-gray-600" />
+      <DropdownMenuItem onClick={handleSignOut} className="text-gray-100 text-md font-medium focus:bg-transparent focus:text-yellow-500 transition-colors cursor-pointer">
+        <LogOut className="h-4 w-4 mr-2" />
+        Sign Out
+      </DropdownMenuItem>
+      <DropdownMenuItem asChild className="block sm:hidden p-0 focus:bg-transparent">
+        <div className="px-2 py-1">
+          <NavItems />
+        </div>
+      </DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
+  )
+}
+
+export default UserDropDown
