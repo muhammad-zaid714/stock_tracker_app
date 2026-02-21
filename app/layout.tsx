@@ -15,9 +15,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Stock App",
   description: "Track real time stock prices,invest wisely and give your portfolio a boost",
-  icons: {
-    icon: '/favicon.svg',
-  },
 };
 
 export default function RootLayout({
