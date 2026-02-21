@@ -1,10 +1,10 @@
 "use client"
-import InputField from "@/components/forms/InputField"
-import SelectField from "@/components/forms/SelectField"
-import CountrySelectField from "@/components/forms/CountrySelectField"
+import InputField from "@/forms/InputField"
+import SelectField from "@/forms/SelectField"
+import CountrySelectField from "@/forms/CountrySelectField"
 import { INVESTMENT_GOALS, PREFERRED_INDUSTRIES, RISK_TOLERANCE_OPTIONS } from "@/lib/constants"
 import {  useForm } from "react-hook-form"
-import FooterLink from "@/components/forms/FooterLink"
+import FooterLink from "@/forms/FooterLink"
 
 const SignUp = () => {
    const {

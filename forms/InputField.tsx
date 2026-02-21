@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input"
 
 import { cn } from "@/lib/utils"
-import { Label } from "../ui/label"
+import { Label } from "../components/ui/label"
 
 const InputField = ({name,label,placeholder,type='text',register,error,validation,disabled,value}:FormInputProps) => {
   return (

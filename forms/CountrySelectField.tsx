@@ -1,9 +1,9 @@
 "use client"
 import { Controller } from "react-hook-form"
-import { Label } from "../ui/label"
-import { Button } from "../ui/button"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
+import { Label } from "../components/ui/label"
+import { Button } from "../components/ui/button"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../components/ui/command"
+import { Popover, PopoverContent, PopoverTrigger } from "../components/ui/popover"
 // @ts-ignore - no types available for this package
 import countryList from 'react-select-country-list'
 // @ts-ignore - no types available for this package
