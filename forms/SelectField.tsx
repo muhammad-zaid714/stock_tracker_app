@@ -1,6 +1,6 @@
 import { Controller } from "react-hook-form"
-import { Label } from "../ui/label"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
+import { Label } from "../components/ui/label"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select"
 
 const SelectField = ({name,label,placeholder,options,control,error,required =  false}:SelectFieldProps) => {
   return (
