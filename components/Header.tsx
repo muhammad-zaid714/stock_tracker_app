@@ -2,7 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 import NavItems from "./NavItems"
 import UserDropDown from "./UserDropDown"
-const Header = () => {
+const Header = ({user}:{user: User}) => {
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-neutral-900/95 backdrop-blur">
       <div className="mx-auto flex w-full max-w-7xl items-center gap-4 px-6 py-4">
@@ -25,7 +25,7 @@ const Header = () => {
         
         {/* User Section */}
         <div className="ml-auto">
-          <UserDropDown />
+          <UserDropDown  user = {user}/>
         </div>
       </div>
     </header>

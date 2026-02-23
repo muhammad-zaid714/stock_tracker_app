@@ -5,8 +5,12 @@ import CountrySelectField from "@/forms/CountrySelectField"
 import { INVESTMENT_GOALS, PREFERRED_INDUSTRIES, RISK_TOLERANCE_OPTIONS } from "@/lib/constants"
 import {  useForm } from "react-hook-form"
 import FooterLink from "@/forms/FooterLink"
+import { signUp } from "@/lib/actions/auth.actions"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 const SignUp = () => {
+   const router = useRouter();
    const {
     register,
     handleSubmit,
@@ -24,11 +28,15 @@ const SignUp = () => {
     },
     mode: "onBlur",
   })
-  const onSubmit = (data:SignUpFormData) => {
+  const onSubmit = async (data:SignUpFormData) => {
     try {
-      console.log(data)
+      const result  = await signUp(data)
+      if(result?.success) router.push('/')
     } catch (error) {
       console.error("Error submitting form data:", error)
+      toast.error("Sign-up failed",{
+        description: error instanceof Error ? error.message : "Failed to create account. Please try again."
+      })
     }
   }
 
