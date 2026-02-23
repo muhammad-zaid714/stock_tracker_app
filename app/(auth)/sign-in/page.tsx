@@ -2,8 +2,12 @@
 import InputField from "@/forms/InputField"
 import FooterLink from "@/forms/FooterLink"
 import { useForm } from "react-hook-form"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+import { signIn } from "@/lib/actions/auth.actions"
 
 const SignIn = () => {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -16,11 +20,15 @@ const SignIn = () => {
     mode: "onBlur",
   })
 
-  const onSubmit = (data: SignInFormData) => {
+  const onSubmit = async (data:SignInFormData) => {
     try {
-      console.log(data)
+      const result  = await signIn(data)
+      if(result?.success) router.push('/')
     } catch (error) {
       console.error("Error submitting form data:", error)
+      toast.error("Sign-in failed",{
+        description: error instanceof Error ? error.message : "Failed to sign in. Please try again."
+      })
     }
   }
 
