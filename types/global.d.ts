@@ -119,6 +119,7 @@ declare global {
     type ProfileData = {
         name?: string;
         marketCapitalization?: number;
+        logo?: string;
     };
 
     type FinancialsData = {
@@ -215,6 +216,12 @@ declare global {
         threshold: number;
         changePercent?: number;
     };
+
+    namespace JSX {
+        interface IntrinsicElements {
+            'l-helix': any;
+        }
+    }
 }
 
 export {};

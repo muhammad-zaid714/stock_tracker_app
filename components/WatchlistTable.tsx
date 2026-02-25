@@ -3,8 +3,10 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import WatchlistButton from "@/components/WatchlistButton";
+import FullPageLoader from "@/components/FullPageLoader";
 import { formatMarketCapValue, formatPrice, formatChangePercent, getChangeColorClass } from "@/lib/utils";
 import { createAlert } from "@/lib/actions/alert.actions";
+import { toast } from "sonner";
 
 interface WatchlistItemRow {
   symbol: string;
@@ -25,6 +27,7 @@ export default function WatchlistTable({
 }) {
   const router = useRouter();
   const [items, setItems] = useState<WatchlistItemRow[]>(initialWatchlist || []);
+  const [loadingAlert, setLoadingAlert] = useState<string | null>(null);
 
   const rows = useMemo(() => items, [items]);
 
@@ -44,6 +47,7 @@ export default function WatchlistTable({
   }
 
   return (
+    <FullPageLoader show={Boolean(loadingAlert)} text="Creating alert...">
     <div className="rounded-2xl border border-white/10 bg-neutral-900/60 overflow-hidden shadow-2xl">
       <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-linear-to-r from-neutral-900/80 to-neutral-900/40">
         <div>
@@ -100,20 +104,50 @@ export default function WatchlistTable({
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
                     <button
-                      className="rounded-full bg-yellow-500/10 text-yellow-300 border border-yellow-500/20 px-3 py-1 text-xs font-semibold hover:bg-yellow-500/20 transition-colors"
+                      className="rounded-full bg-yellow-500/10 text-yellow-300 border border-yellow-500/20 px-3 py-1 text-xs font-semibold hover:bg-yellow-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       title="Add alert"
+                      disabled={loadingAlert === item.symbol}
                       onClick={async () => {
                         const targetPrice = item.price ? Number((item.price * 1.05).toFixed(2)) : undefined;
-                        if (!targetPrice) return;
-                        await createAlert({
-                          symbol: item.symbol,
-                          company: item.company,
-                          condition: "upper",
-                          targetPrice,
-                          frequency: "once-per-day",
-                        });
-                        onAddAlert?.(item);
-                        router.refresh();
+                        if (!targetPrice) {
+                          toast.error("Price data unavailable", {
+                            description: "We couldn't fetch the latest price for this stock.",
+                            className: "bg-neutral-900 text-white border border-white/10 shadow-2xl",
+                            descriptionClassName: "text-gray-400",
+                          });
+                          return;
+                        }
+
+                        setLoadingAlert(item.symbol);
+                        try {
+                          const result = await createAlert({
+                            symbol: item.symbol,
+                            company: item.company,
+                            condition: "upper",
+                            targetPrice,
+                            frequency: "once-per-day",
+                          });
+                          if (!result?.success) {
+                            toast.error("Alert not created", {
+                              description: result?.message || "Please try again in a moment.",
+                              className: "bg-neutral-900 text-white border border-white/10 shadow-2xl",
+                              descriptionClassName: "text-gray-400",
+                            });
+                            setLoadingAlert(null);
+                            return;
+                          }
+                          onAddAlert?.(item);
+                          router.refresh();
+                          setTimeout(() => setLoadingAlert(null), 1200);
+                        } catch (error) {
+                          setLoadingAlert(null);
+                          console.error("Error creating alert:", error);
+                          toast.error("Alert failed", {
+                            description: "Something went wrong while creating the alert.",
+                            className: "bg-neutral-900 text-white border border-white/10 shadow-2xl",
+                            descriptionClassName: "text-gray-400",
+                          });
+                        }
                       }}
                       type="button"
                     >
@@ -135,5 +169,6 @@ export default function WatchlistTable({
         </table>
       </div>
     </div>
+    </FullPageLoader>
   );
 }

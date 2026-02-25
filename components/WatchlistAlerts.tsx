@@ -11,6 +11,7 @@ interface AlertItem {
   condition?: "upper" | "lower";
   targetPrice?: number;
   frequency?: "once-per-day" | "once-per-hour" | "once-per-minute";
+  logo?: string;
 }
 
 const formatFrequency = (value?: string) => {
@@ -49,9 +50,17 @@ export default function WatchlistAlerts({ alerts }: { alerts: AlertItem[] }) {
           return (
             <div key={item._id ?? item.symbol} className="rounded-xl border border-white/10 bg-neutral-900/80 p-4 hover:border-white/20 transition-colors">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-white font-semibold">{item.company}</p>
-                  <p className="text-xs text-gray-500">{item.symbol}</p>
+                <div className="flex items-center gap-3">
+                  <img
+                    src={item.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.symbol)}&background=0D0F12&color=FACC15&size=64`}
+                    alt={`${item.symbol} logo`}
+                    className="h-10 w-10 rounded-full border border-white/10 bg-neutral-900 object-contain"
+                    loading="lazy"
+                  />
+                  <div>
+                    <p className="text-white font-semibold">{item.company}</p>
+                    <p className="text-xs text-gray-500">{item.symbol}</p>
+                  </div>
                 </div>
                 <div className="text-right">
                   <p className="text-gray-200 font-semibold">

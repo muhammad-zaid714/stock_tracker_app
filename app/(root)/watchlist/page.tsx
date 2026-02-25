@@ -13,6 +13,7 @@ type WatchlistRow = {
   changePercent?: number;
   marketCap?: number;
   peRatio?: number;
+  logo?: string;
 };
 
 const buildWatchlistRows = async (symbols: string[], fallbackCompanyMap: Map<string, string>) => {
@@ -31,6 +32,7 @@ const buildWatchlistRows = async (symbols: string[], fallbackCompanyMap: Map<str
         changePercent: quote?.dp,
         marketCap: profile?.marketCapitalization,
         peRatio: financials?.metric?.peTTM,
+        logo: profile?.logo,
       } as WatchlistRow;
     })
   );
@@ -53,7 +55,7 @@ export default async function WatchlistPage() {
 
   const alerts = await getUserAlerts();
   const alertSymbols = new Map(
-    rows.map((row) => [row.symbol, { price: row.price, changePercent: row.changePercent }])
+    rows.map((row) => [row.symbol, { price: row.price, changePercent: row.changePercent, logo: row.logo }])
   );
   const alertCards = alerts.map((alert) => ({
     ...alert,
@@ -61,6 +63,7 @@ export default async function WatchlistPage() {
     createdAt: alert?.createdAt ? new Date(alert.createdAt).toISOString() : undefined,
     price: alertSymbols.get(alert.symbol)?.price,
     changePercent: alertSymbols.get(alert.symbol)?.changePercent,
+    logo: alertSymbols.get(alert.symbol)?.logo,
   }));
 
   return (

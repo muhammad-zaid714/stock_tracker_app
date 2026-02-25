@@ -6,9 +6,11 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import FullPageLoader from "@/components/FullPageLoader";
 import { toggleWatchlist } from "@/lib/actions/watchlist.actions";
 import { createAlert } from "@/lib/actions/alert.actions";
 import { formatPrice } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface WatchlistRow {
   symbol: string;
@@ -20,6 +22,7 @@ export default function WatchlistControls({ watchlistRows }: { watchlistRows: Wa
   const router = useRouter();
   const [openAddStock, setOpenAddStock] = useState(false);
   const [openAddAlert, setOpenAddAlert] = useState(false);
+  const [loadingAlert, setLoadingAlert] = useState(false);
 
   const [symbol, setSymbol] = useState("");
   const [company, setCompany] = useState("");
@@ -42,22 +45,52 @@ export default function WatchlistControls({ watchlistRows }: { watchlistRows: Wa
   };
 
   const handleAddAlert = async () => {
-    if (!alertSymbol || !targetPrice) return;
-    const selected = symbolMap.get(alertSymbol);
-    await createAlert({
-      symbol: alertSymbol,
-      company: selected?.company || alertSymbol,
-      condition,
-      targetPrice: Number(targetPrice),
-      frequency,
-    });
-    setOpenAddAlert(false);
-    setAlertSymbol("");
-    setTargetPrice("");
-    router.refresh();
+    if (!alertSymbol || !targetPrice) {
+      toast.error("Missing alert details", {
+        description: "Choose a symbol and enter a target price.",
+        className: "bg-neutral-900 text-white border border-white/10 shadow-2xl",
+        descriptionClassName: "text-gray-400",
+      });
+      return;
+    }
+    
+    setLoadingAlert(true);
+    try {
+      const selected = symbolMap.get(alertSymbol);
+      const result = await createAlert({
+        symbol: alertSymbol,
+        company: selected?.company || alertSymbol,
+        condition,
+        targetPrice: Number(targetPrice),
+        frequency,
+      });
+      if (!result?.success) {
+        toast.error("Alert not created", {
+          description: result?.message || "Please try again in a moment.",
+          className: "bg-neutral-900 text-white border border-white/10 shadow-2xl",
+          descriptionClassName: "text-gray-400",
+        });
+        setLoadingAlert(false);
+        return;
+      }
+      setOpenAddAlert(false);
+      setAlertSymbol("");
+      setTargetPrice("");
+      router.refresh();
+      setTimeout(() => setLoadingAlert(false), 1200);
+    } catch (error) {
+      setLoadingAlert(false);
+      console.error('Error creating alert:', error);
+      toast.error("Alert failed", {
+        description: "Something went wrong while creating the alert.",
+        className: "bg-neutral-900 text-white border border-white/10 shadow-2xl",
+        descriptionClassName: "text-gray-400",
+      });
+    }
   };
 
   return (
+    <FullPageLoader show={loadingAlert} text="Creating alert...">
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
       <div>
         <div className="inline-flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-xs text-emerald-300 border border-emerald-500/20">
@@ -157,12 +190,17 @@ export default function WatchlistControls({ watchlistRows }: { watchlistRows: Wa
               </SelectContent>
             </Select>
 
-            <Button onClick={handleAddAlert} className="w-full bg-linear-to-r from-yellow-400 to-yellow-500 text-gray-900 font-semibold">
+            <Button 
+              onClick={handleAddAlert} 
+              disabled={loadingAlert}
+              className="w-full bg-linear-to-r from-yellow-400 to-yellow-500 text-gray-900 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               Create Alert
             </Button>
           </div>
         </DialogContent>
       </Dialog>
     </div>
+    </FullPageLoader>
   );
 }
