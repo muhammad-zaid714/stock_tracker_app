@@ -102,3 +102,37 @@ export const getNews = async (symbols?: string[]): Promise<MarketNewsArticle[]> 
     throw new Error("Failed to fetch news");
   }
 };
+
+export const searchStocks = async (query: string): Promise<FinnhubSearchResult[]> => {
+  if (!query || query.trim().length === 0) {
+    return [];
+  }
+
+  try {
+    const url = `${FINNHUB_BASE_URL}/search?q=${encodeURIComponent(query.trim())}&token=${getFinnhubApiKey()}`;
+    const response = await fetchJSON<FinnhubSearchResponse>(url);
+    
+    if (!response.result || !Array.isArray(response.result)) {
+      return [];
+    }
+
+    return response.result
+      .filter(
+        (stock) =>
+          stock.symbol &&
+          stock.description &&
+          (stock.type === 'Common Stock' || stock.type === 'ETF' || !stock.type)
+      )
+      .map((stock) => ({
+        symbol: stock.symbol.toUpperCase(),
+        description: stock.description,
+        displaySymbol: stock.displaySymbol || stock.symbol,
+        type: stock.type || 'Stock',
+      }))
+      .slice(0, 10);
+  } catch (error) {
+    console.error('Error searching stocks:', error);
+    return [];
+  }
+};
+
