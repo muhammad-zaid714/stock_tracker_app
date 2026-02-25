@@ -21,7 +21,7 @@ const NavItems = ({initialStocks}:{initialStocks: StockWithWatchlistStatus[]}) =
                 label="Search"
                 initialStocks={initialStocks}
               />
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-emerald-400 to-blue-400 transition-all duration-300 group-hover:w-full"></span>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-linear-to-r from-emerald-400 to-blue-400 transition-all duration-300 group-hover:w-full"></span>
             </div>
           </li>
         )
@@ -30,16 +30,16 @@ const NavItems = ({initialStocks}:{initialStocks: StockWithWatchlistStatus[]}) =
             href={href}
             className={`relative transition-all duration-300 ${
               isActive(href) 
-                ? "text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400 font-semibold" 
+                ? "text-transparent bg-clip-text bg-linear-to-r from-emerald-400 to-teal-400 font-semibold" 
                 : "text-gray-300 hover:text-white"
             }`}
           >
             {label}
-            <span className={`absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-emerald-400 to-blue-400 transition-all duration-300 ${
+            <span className={`absolute -bottom-1 left-0 h-0.5 bg-linear-to-r from-emerald-400 to-blue-400 transition-all duration-300 ${
               isActive(href) ? 'w-full' : 'w-0 group-hover:w-full'
             }`}></span>
             {isActive(href) && (
-              <span className="absolute -inset-x-2 -inset-y-1 bg-gradient-to-r from-emerald-500/10 to-blue-500/10 rounded-lg -z-10 animate-pulse"></span>
+              <span className="absolute -inset-x-2 -inset-y-1 bg-linear-to-r from-emerald-500/10 to-blue-500/10 rounded-lg -z-10 animate-pulse"></span>
             )}
           </Link>
         </li>

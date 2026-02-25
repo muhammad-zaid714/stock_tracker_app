@@ -20,7 +20,7 @@ declare module 'react-country-flag' {
     cdnSuffix?: string;
     style?: CSSProperties;
     title?: string;
-    aria-label?: string;
+    "aria-label"?: string;
     className?: string;
   }
 

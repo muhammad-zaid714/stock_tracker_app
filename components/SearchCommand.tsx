@@ -102,15 +102,15 @@ export default function SearchCommand({renderAs = 'button', label = 'Add stock',
         </Button>
       )}
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="overflow-hidden p-0 border border-white/10 bg-neutral-900/98 backdrop-blur-2xl shadow-2xl lg:min-w-[800px] fixed top-10 left-1/2 -translate-x-1/2 translate-y-10 rounded-3xl">
+      <DialogContent className="overflow-hidden p-0 border border-white/10 bg-neutral-900/98 backdrop-blur-2xl shadow-2xl lg:min-w-200 fixed top-10 left-1/2 -translate-x-1/2 translate-y-10 rounded-3xl">
         {/* Animated Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-blue-500/5 to-purple-500/5 pointer-events-none"></div>
+        <div className="absolute inset-0 bg-linear-to-br from-emerald-500/5 via-blue-500/5 to-purple-500/5 pointer-events-none"></div>
         <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl animate-pulse pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl animate-pulse pointer-events-none" style={{animationDelay: '1s'}}></div>
         
         <DialogTitle className="sr-only">Search Stocks</DialogTitle>
         <Command className="bg-transparent relative z-10">
-            <div className='relative border-b border-white/10 bg-gradient-to-r from-neutral-800/50 to-neutral-900/50 backdrop-blur-sm'>
+          <div className='relative border-b border-white/10 bg-linear-to-r from-neutral-800/50 to-neutral-900/50 backdrop-blur-sm'>
               {/* Search Icon */}
               <div className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-400">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -122,7 +122,7 @@ export default function SearchCommand({renderAs = 'button', label = 'Add stock',
                 placeholder="Search stocks by name or symbol..."
                 value={searchTerm}
                 onValueChange={setSearchTerm}
-                className="text-white placeholder:text-gray-500 !bg-transparent border-0 focus:ring-0 text-base h-16 pl-12 pr-12"
+                className="text-white placeholder:text-gray-500 bg-transparent! border-0 focus:ring-0 text-base h-16 pl-12 pr-12"
               />
               
               {/* Loading Spinner */}
@@ -138,9 +138,9 @@ export default function SearchCommand({renderAs = 'button', label = 'Add stock',
               </div>
             </div>
             
-          <CommandList className='!bg-transparent max-h-[500px] overflow-y-auto'>
+              <CommandList className='bg-transparent! max-h-125 overflow-y-auto'>
             {loading ? (
-                <CommandEmpty className='!bg-transparent border-0'>
+                <CommandEmpty className='bg-transparent! border-0'>
                   <div className="flex flex-col items-center gap-4 py-12">
                     <div className="relative">
                       <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-xl animate-pulse"></div>
@@ -168,7 +168,7 @@ export default function SearchCommand({renderAs = 'button', label = 'Add stock',
                 </div>
             ) : (
                 <ul className="p-2">
-                    <div className='sticky top-0 z-10 mb-3 px-4 py-3 bg-gradient-to-r from-neutral-800/95 to-neutral-900/95 backdrop-blur-xl text-gray-300 border-b border-white/5 rounded-xl shadow-lg flex items-center justify-between'>
+                  <div className='sticky top-0 z-10 mb-3 px-4 py-3 bg-linear-to-r from-neutral-800/95 to-neutral-900/95 backdrop-blur-xl text-gray-300 border-b border-white/5 rounded-xl shadow-lg flex items-center justify-between'>
                       <div className="flex items-center gap-2">
                         {isSearchMode ? (
                           <>
@@ -199,12 +199,12 @@ export default function SearchCommand({renderAs = 'button', label = 'Add stock',
                               className='group relative flex items-center gap-4 py-4 px-4 rounded-2xl border border-white/5 hover:border-emerald-500/30 bg-white/0 hover:bg-white/5 transition-all duration-300 overflow-hidden'
                             >
                               {/* Hover Gradient Effect */}
-                              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-blue-500/0 to-purple-500/0 group-hover:from-emerald-500/5 group-hover:via-blue-500/5 group-hover:to-purple-500/5 transition-all duration-500"></div>
+                              <div className="absolute inset-0 bg-linear-to-r from-emerald-500/0 via-blue-500/0 to-purple-500/0 group-hover:from-emerald-500/5 group-hover:via-blue-500/5 group-hover:to-purple-500/5 transition-all duration-500"></div>
                               
                               {/* Stock Icon */}
-                              <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500/15 via-teal-500/15 to-blue-500/15 flex items-center justify-center group-hover:from-emerald-500/25 group-hover:to-blue-500/25 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-lg">
+                              <div className="relative w-12 h-12 rounded-xl bg-linear-to-br from-emerald-500/15 via-teal-500/15 to-blue-500/15 flex items-center justify-center group-hover:from-emerald-500/25 group-hover:to-blue-500/25 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-lg">
                                 <TrendingUp className='h-6 w-6 text-emerald-400 transition-transform duration-300'/>
-                                <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/20 to-blue-400/20 rounded-xl blur-md group-hover:blur-lg transition-all duration-300"></div>
+                                <div className="absolute inset-0 bg-linear-to-br from-emerald-400/20 to-blue-400/20 rounded-xl blur-md group-hover:blur-lg transition-all duration-300"></div>
                               </div>
                               
                               {/* Stock Info */}
