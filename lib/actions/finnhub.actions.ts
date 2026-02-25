@@ -1,0 +1,104 @@
+"use server";
+
+import { formatArticle, getDateRange, validateArticle } from "@/lib/utils";
+
+const FINNHUB_BASE_URL = "https://finnhub.io/api/v1";
+const NEXT_PUBLIC_FINNHUB_API_KEY = process.env.NEXT_PUBLIC_FINNHUB_API_KEY ?? "";
+
+const getFinnhubApiKey = () => {
+  if (!NEXT_PUBLIC_FINNHUB_API_KEY) {
+    throw new Error("Missing NEXT_PUBLIC_FINNHUB_API_KEY");
+  }
+  return NEXT_PUBLIC_FINNHUB_API_KEY;
+};
+
+export const fetchJSON = async <T>(
+  url: string,
+  revalidateSeconds?: number
+): Promise<T> => {
+  const options: RequestInit & { next?: { revalidate: number } } =
+    typeof revalidateSeconds === "number"
+      ? { cache: "force-cache", next: { revalidate: revalidateSeconds } }
+      : { cache: "no-store" };
+
+  const response = await fetch(url, options);
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => "");
+    throw new Error(
+      `Finnhub request failed: ${response.status} ${response.statusText} ${errorText}`.trim()
+    );
+  }
+
+  return (await response.json()) as T;
+};
+
+const buildCompanyNewsUrl = (symbol: string, from: string, to: string) =>
+  `${FINNHUB_BASE_URL}/company-news?symbol=${encodeURIComponent(symbol)}&from=${from}&to=${to}&token=${getFinnhubApiKey()}`;
+
+const buildGeneralNewsUrl = () =>
+  `${FINNHUB_BASE_URL}/news?category=general&token=${getFinnhubApiKey()}`;
+
+const getGeneralMarketNews = async (): Promise<MarketNewsArticle[]> => {
+  const url = buildGeneralNewsUrl();
+  const rawArticles = await fetchJSON<RawNewsArticle[]>(url);
+
+  const results: MarketNewsArticle[] = [];
+  const seen = new Set<string>();
+
+  for (const article of rawArticles) {
+    if (!validateArticle(article)) continue;
+
+    const key = `${article.id ?? ""}|${article.url ?? ""}|${article.headline ?? ""}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    results.push(formatArticle(article, false, undefined, results.length));
+
+    if (results.length >= 6) break;
+  }
+
+  return results;
+};
+
+export const getNews = async (symbols?: string[]): Promise<MarketNewsArticle[]> => {
+  try {
+    const { from, to } = getDateRange(5);
+    const cleanedSymbols = (symbols ?? [])
+      .map((symbol) => symbol.trim().toUpperCase())
+      .filter(Boolean);
+
+    if (cleanedSymbols.length > 0) {
+      const results: MarketNewsArticle[] = [];
+      const seen = new Set<string>();
+
+      for (let i = 0; i < 6; i += 1) {
+        const symbol = cleanedSymbols[i % cleanedSymbols.length];
+        const url = buildCompanyNewsUrl(symbol, from, to);
+        const companyNews = await fetchJSON<RawNewsArticle[]>(url);
+
+        const candidate = companyNews.find((article) => {
+          if (!validateArticle(article)) return false;
+          const key = `${article.id ?? ""}|${article.url ?? ""}|${article.headline ?? ""}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+
+        if (candidate) {
+          results.push(formatArticle(candidate, true, symbol, results.length));
+        }
+      }
+
+      if (results.length === 0) {
+        return await getGeneralMarketNews();
+      }
+
+      return results.sort((a, b) => b.datetime - a.datetime).slice(0, 6);
+    }
+
+    return await getGeneralMarketNews();
+  } catch (error) {
+    console.error("Error fetching news:", error);
+    throw new Error("Failed to fetch news");
+  }
+};
