@@ -38,6 +38,15 @@ const buildCompanyNewsUrl = (symbol: string, from: string, to: string) =>
 const buildGeneralNewsUrl = () =>
   `${FINNHUB_BASE_URL}/news?category=general&token=${getFinnhubApiKey()}`;
 
+const buildQuoteUrl = (symbol: string) =>
+  `${FINNHUB_BASE_URL}/quote?symbol=${encodeURIComponent(symbol)}&token=${getFinnhubApiKey()}`;
+
+const buildProfileUrl = (symbol: string) =>
+  `${FINNHUB_BASE_URL}/stock/profile2?symbol=${encodeURIComponent(symbol)}&token=${getFinnhubApiKey()}`;
+
+const buildMetricUrl = (symbol: string) =>
+  `${FINNHUB_BASE_URL}/stock/metric?symbol=${encodeURIComponent(symbol)}&metric=all&token=${getFinnhubApiKey()}`;
+
 const getGeneralMarketNews = async (): Promise<MarketNewsArticle[]> => {
   const url = buildGeneralNewsUrl();
   const rawArticles = await fetchJSON<RawNewsArticle[]>(url);
@@ -133,6 +142,38 @@ export const searchStocks = async (query: string): Promise<FinnhubSearchResult[]
   } catch (error) {
     console.error('Error searching stocks:', error);
     return [];
+  }
+};
+
+export const getQuote = async (symbol: string): Promise<QuoteData | null> => {
+  try {
+    const url = buildQuoteUrl(symbol);
+    return await fetchJSON<QuoteData>(url, 60);
+  } catch (error) {
+    console.error("Error fetching quote:", error);
+    return null;
+  }
+};
+
+export const getCompanyProfile = async (symbol: string): Promise<ProfileData | null> => {
+  try {
+    const url = buildProfileUrl(symbol);
+    return await fetchJSON<ProfileData>(url, 3600);
+  } catch (error) {
+    console.error("Error fetching company profile:", error);
+    return null;
+  }
+};
+
+export const getBasicFinancials = async (
+  symbol: string
+): Promise<{ metric?: { peTTM?: number } } | null> => {
+  try {
+    const url = buildMetricUrl(symbol);
+    return await fetchJSON<{ metric?: { peTTM?: number } }>(url, 3600);
+  } catch (error) {
+    console.error("Error fetching basic financials:", error);
+    return null;
   }
 };
 

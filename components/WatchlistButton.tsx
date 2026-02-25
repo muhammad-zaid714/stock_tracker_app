@@ -1,29 +1,68 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { Loader2, Star } from "lucide-react";
+import { Loader2, Star, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { toggleWatchlist } from "@/lib/actions/watchlist.actions";
 
 interface WatchlistButtonProps {
   symbol: string;
+  company?: string;
   initialInWatchlist?: boolean;
+  type?: "button" | "icon";
+  showTrashIcon?: boolean;
+  onWatchlistChange?: (symbol: string, isAdded: boolean) => void;
 }
 
-export default function WatchlistButton({ symbol, initialInWatchlist = false }: WatchlistButtonProps) {
+export default function WatchlistButton({
+  symbol,
+  company,
+  initialInWatchlist = false,
+  type = "button",
+  showTrashIcon = false,
+  onWatchlistChange,
+}: WatchlistButtonProps) {
   const [inWatchlist, setInWatchlist] = useState(initialInWatchlist);
   const [isLoading, setIsLoading] = useState(false);
 
-  const toggleWatchlist = async () => {
+  const handleToggleWatchlist = async () => {
     setIsLoading(true);
     try {
-      // TODO: Implement watchlist toggle action
-      setInWatchlist(!inWatchlist);
+      const result = await toggleWatchlist({
+        symbol,
+        company: company || symbol,
+      });
+
+      if (result?.success) {
+        const isAdded = result.action === "added";
+        setInWatchlist(isAdded);
+        onWatchlistChange?.(symbol, isAdded);
+      }
     } catch (error) {
       console.error('Error toggling watchlist:', error);
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (type === "icon") {
+    return (
+      <button
+        type="button"
+        onClick={handleToggleWatchlist}
+        disabled={isLoading}
+        aria-label={inWatchlist ? "Remove from watchlist" : "Add to watchlist"}
+        title={inWatchlist ? "Remove from watchlist" : "Add to watchlist"}
+        className="group relative inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-neutral-900/70 text-gray-300 transition-all duration-300 hover:border-yellow-400/40 hover:text-yellow-400 disabled:opacity-60"
+      >
+        {showTrashIcon ? (
+          <Trash2 className="h-4 w-4" />
+        ) : (
+          <Star className={`h-4 w-4 ${inWatchlist ? 'fill-current text-yellow-400' : ''}`} />
+        )}
+      </button>
+    );
+  }
 
   return (
     <div className="relative group">
@@ -35,7 +74,7 @@ export default function WatchlistButton({ symbol, initialInWatchlist = false }: 
       }`}></div>
       
       <Button
-        onClick={toggleWatchlist}
+        onClick={handleToggleWatchlist}
         disabled={isLoading}
         className={`relative w-full h-14 font-bold text-base transition-all duration-500 shadow-2xl rounded-2xl overflow-hidden group-hover:scale-[1.02] active:scale-[0.98] ${
           inWatchlist 

@@ -16,6 +16,7 @@ import { Button } from './ui/button';
 import { Loader2, Star, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { searchStocks } from '@/lib/actions/finnhub.actions';
+import { toggleWatchlist } from '@/lib/actions/watchlist.actions';
 import { useDebounce } from '@/hooks/useDebounce';
 
 interface SearchResult {
@@ -23,12 +24,14 @@ interface SearchResult {
   description: string;
   displaySymbol?: string;
   type?: string;
+  isInWatchlist?: boolean;
 }
 
 export default function SearchCommand({renderAs = 'button', label = 'Add stock', initialStocks = []}:{renderAs?:'button'|'text', label:string, initialStocks?:SearchResult[]}) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
+  const [baseStocks, setBaseStocks] = useState<SearchResult[]>(initialStocks || []);
   const [stocks, setStocks] = useState<SearchResult[]>(initialStocks || []);
   const isSearchMode = !!searchTerm.trim();
   const displayStocks = isSearchMode ? stocks : stocks?.slice(0, 10);   
@@ -45,16 +48,28 @@ export default function SearchCommand({renderAs = 'button', label = 'Add stock',
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  useEffect(() => {
+    setBaseStocks(initialStocks || []);
+    setStocks(initialStocks || []);
+  }, [initialStocks]);
+
 
     const handleSearch = async () => {
       if (!isSearchMode) {
-        setStocks(initialStocks);
+        setStocks(baseStocks);
         return;
       }
       setLoading(true);
       try {
         const result = await searchStocks(searchTerm.trim());
-        setStocks(result as unknown as SearchResult[]);
+        const watchlistSet = new Set(
+          baseStocks.filter((item) => item.isInWatchlist).map((item) => item.symbol)
+        );
+        const mapped = (result as unknown as SearchResult[]).map((item) => ({
+          ...item,
+          isInWatchlist: watchlistSet.has(item.symbol),
+        }));
+        setStocks(mapped);
       } catch (error) {
         console.error('Search error:', error);
         setStocks([]);
@@ -72,7 +87,38 @@ export default function SearchCommand({renderAs = 'button', label = 'Add stock',
     
     setOpen(false);
     setSearchTerm('');
-    setStocks(initialStocks)
+    setStocks(baseStocks)
+  };
+
+  const handleToggleWatchlist = async (
+    e: React.MouseEvent<HTMLButtonElement>,
+    stock: SearchResult
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const result = await toggleWatchlist({
+      symbol: stock.symbol,
+      company: stock.description || stock.symbol,
+    });
+
+    if (!result?.success) return;
+
+    const isAdded = result.action === 'added';
+    setStocks((prev) =>
+      prev.map((item) =>
+        item.symbol === stock.symbol
+          ? { ...item, isInWatchlist: isAdded }
+          : item
+      )
+    );
+    setBaseStocks((prev) =>
+      prev.map((item) =>
+        item.symbol === stock.symbol
+          ? { ...item, isInWatchlist: isAdded }
+          : item
+      )
+    );
   };
 
   const openDialog = (e: React.MouseEvent) => {
@@ -218,7 +264,20 @@ export default function SearchCommand({renderAs = 'button', label = 'Add stock',
                               </div>
                               
                               {/* Star Icon */}
-                              <Star className="relative z-10 h-5 w-5 text-gray-600 group-hover:text-yellow-400 group-hover:scale-125 group-hover:rotate-12 transition-all duration-300"/>
+                              <button
+                                type="button"
+                                onClick={(e) => handleToggleWatchlist(e, stock)}
+                                className="relative z-10"
+                                aria-label={stock.isInWatchlist ? 'Remove from watchlist' : 'Add to watchlist'}
+                              >
+                                <Star
+                                  className={`h-5 w-5 transition-all duration-300 ${
+                                    stock.isInWatchlist
+                                      ? 'text-yellow-400 fill-current scale-110'
+                                      : 'text-gray-600 group-hover:text-yellow-400 group-hover:scale-125 group-hover:rotate-12'
+                                  }`}
+                                />
+                              </button>
                             </Link>
                         </li>
                     ))}

@@ -3,16 +3,23 @@ import Link from "next/link"
 import NavItems from "./NavItems"
 import UserDropDown from "./UserDropDown"
 import { searchStocks } from "@/lib/actions/finnhub.actions"
+import { getWatchlistSymbolsByUserId } from "@/lib/actions/watchlist.actions"
 
 const Header = async ({user}:{user: User}) => {
   const popularSymbols = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA'];
   
   try {
-    const stockPromises = popularSymbols.map(symbol => searchStocks(symbol));
-    const stockResults = await Promise.all(stockPromises);
+    const [watchlistSymbols, stockResults] = await Promise.all([
+      getWatchlistSymbolsByUserId(user.id),
+      Promise.all(popularSymbols.map(symbol => searchStocks(symbol))),
+    ]);
     const initialStocks = stockResults
       .map(results => results[0])
-      .filter(Boolean) as unknown as StockWithWatchlistStatus[];
+      .filter(Boolean)
+      .map((stock) => ({
+        ...stock,
+        isInWatchlist: watchlistSymbols.includes(stock.symbol),
+      })) as unknown as StockWithWatchlistStatus[];
     
     return (
       <header className="sticky top-0 z-50 border-b border-white/5 bg-neutral-950/90 backdrop-blur-2xl shadow-2xl">
