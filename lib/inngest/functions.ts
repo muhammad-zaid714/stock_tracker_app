@@ -5,6 +5,7 @@ import { getAllUsersForNewsEmail } from "../actions/user.actions"
 import { getWatchlistSymbolsByEmail } from "../actions/watchlist.actions"
 import { getNews } from "../actions/finnhub.actions"
 
+// Force Inngest sync - daily email disabled
 
 export const sendSignUpEmail = inngest.createFunction(
     {id:'sign-up-email'},
